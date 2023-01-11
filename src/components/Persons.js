@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 
-import { Card, Stack, Button, Typography, Container, TableHead } from '@mui/material';
+import { Card, Stack, Typography, Container, TableHead } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -21,7 +21,9 @@ import CreateRoundedIcon from '@mui/icons-material/CreateRounded';
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded';
 import PersonAddAlt1RoundedIcon from '@mui/icons-material/PersonAddAlt1Rounded';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadPersons } from '../redux/actions';
+import { deletePerson, loadPersons } from '../redux/actions';
+import Modal from '@mui/material/Modal';
+import AddPerson from '../components/AddPerson';
 
 
 function TablePaginationActions(props) {
@@ -95,13 +97,24 @@ function TablePaginationActions(props) {
     { id: 'delete', label: '', minWidth: 50 }
   ];
 
+
 const Persons = () => {
     let dispatch = useDispatch();
     const {persons} = useSelector(state => state.data)
 
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
     useEffect(() => {
         dispatch(loadPersons());
     }, [])
+
+    const handleDelete =(documentType, documentNumber)=>{
+        if(window.confirm("Are you sure?")){
+            dispatch(deletePerson(documentType, documentNumber))
+        }
+    }
 
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -116,6 +129,7 @@ const Persons = () => {
       setRowsPerPage(parseInt(event.target.value, 10));
       setPage(0);
     };
+
         return  (   
         <>  
         <Container>
@@ -123,7 +137,7 @@ const Persons = () => {
             <Typography variant="h4" gutterBottom>
               Persons
             </Typography>
-            <IconButton color="primary" onClick=""><PersonAddAlt1RoundedIcon style={{ fontSize: "60px", color: "#43a047"  }}/></IconButton>
+            <IconButton  onClick={handleOpen}><PersonAddAlt1RoundedIcon style={{ fontSize: "60px", color: "#43a047"  }}/></IconButton>
           </Stack>
           <Card>
           <TableContainer component={Paper}>
@@ -150,7 +164,7 @@ const Persons = () => {
                         <TableCell style={{ width: 130 }} align="left">{row.lastName}</TableCell>
                         <TableCell style={{ width: 170 }} align="left">{row.hobbie}</TableCell>
                         <TableCell style={{ width: 50 }} align="left"><IconButton onClick=""><CreateRoundedIcon style={{ fontSize: "30px", color: "#fbc02d"  }}/></IconButton></TableCell>
-                        <TableCell style={{ width: 50 }} align="left"><IconButton onClick=""><PersonRemoveRoundedIcon style={{ fontSize: "30px", color: "#d50000"  }}/></IconButton></TableCell>     
+                        <TableCell style={{ width: 50 }} align="left"><IconButton onClick={() => handleDelete(row.documentType, row.documentNumber)}><PersonRemoveRoundedIcon style={{ fontSize: "30px", color: "#d50000"  }}/></IconButton></TableCell>     
                     </TableRow>
                 ))}
                 {emptyRows > 0 && (
@@ -182,6 +196,14 @@ const Persons = () => {
             </Table>
             </TableContainer>
           </Card>
+          <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+            <AddPerson />
+          </Modal>
         </Container>
       </>
     )}

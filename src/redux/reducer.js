@@ -13,7 +13,19 @@ const personsReducers = (state = initialState, action) => {
                 ...state,
                 persons: action.payload,
                 loading: false,
-            }
+            };
+        case types.DELETE_PERSON:
+            return {
+                ...state,
+                res: action.payload,
+                loading: false,
+            };
+            case types.ADD_PERSON:
+                return{ 
+                ...state,
+                res: action.payload,
+                loading: false,
+                 };
         default:
             return state;
     }
