@@ -20,7 +20,7 @@ const personAdded = (res) => ({
 
 export const loadPersons = () => {
     return function (dispatch) {
-        axios.get('http://127.0.0.1:8000/person').then((res) => {
+        axios.get('https://34.176.135.207:8000/person').then((res) => {
             console.log("res", res.data);  
             dispatch(getPersons(res.data.data));
         }).catch(error => console.log(error));
@@ -29,7 +29,7 @@ export const loadPersons = () => {
 
 export const deletePerson = (documentType, documentNumber) => {
     return function (dispatch) {
-        axios.delete(`http://127.0.0.1:8000/person?documentType=${documentType}&documentNumber=${documentNumber}`).then((res) => {
+        axios.delete(`https://34.176.135.207:8000/person?documentType=${documentType}&documentNumber=${documentNumber}`).then((res) => {
             console.log("res", res.data); 
             if(res.status===200){
                 alert("Person Deleted Sucsesful")
@@ -48,7 +48,7 @@ export const deletePerson = (documentType, documentNumber) => {
 
 export const AddPersons = (person) => {
     return function (dispatch) {
-        axios.post(`http://127.0.0.1:8000/person`, person).then((res) => {
+        axios.post(`https://34.176.135.207:8000/person`, person).then((res) => {
             console.log("res", res.data);  
             console.log("res", res.status);
             if(res.status===201){
