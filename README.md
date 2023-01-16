@@ -1,2 +1,2 @@
 # InfoManagerFront
-Almacena código fuente del fron de administración de personas
+Almacena código fuente del front de administración de personas
