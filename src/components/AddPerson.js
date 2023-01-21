@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Box from '@mui/material/Box';
 import Input from '@mui/material/Input';
 import Select from '@mui/material/Select';
@@ -11,6 +11,8 @@ import IconButton from '@mui/material/IconButton';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import {useDispatch} from "react-redux";
 import { AddPersons } from '../redux/actions';
+import { requestOperation, saveData, setRequestError, setSucces} from '../redux/actions';
+
 
 const docTypes = [
   {
@@ -44,7 +46,20 @@ const style = {
 };
 
 
-export const AddPerson = () => {
+export const AddPerson = ({setModalInsertar}) => {
+  useEffect(() => {
+    dispatch(setRequestError(null));
+  }, [])
+   useEffect(() => {
+     dispatch(setSucces(null));
+   }, [])
+   useEffect(() => {
+     dispatch(saveData(null));
+   }, [])
+   useEffect(() => {
+       dispatch(requestOperation(null));
+   }, [])
+
 
   const [state, setState] = React.useState({
     documentType:"", 
@@ -72,13 +87,10 @@ export const AddPerson = () => {
 
   const handleInputChange = (e) => {
     let { name, value } = e.target;
-    console.log(name)
-    console.log(value)
     setState ({ ...state, [name]: value});
   }
   const [error, setError] = React.useState();
   const handleSend = (e) => {
-    console.log(state)
     e.preventDefault();
     if (!first_name || !documentNumber || !lastName){
       setError("Please verify the information")
@@ -87,6 +99,7 @@ export const AddPerson = () => {
       dispatch(AddPersons(state));
       setError("");
     }
+    setModalInsertar(false)
   }
 
   return (

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import { Card, Stack, Typography, Container, TableHead } from '@mui/material';
 import PropTypes from 'prop-types';
@@ -21,9 +21,13 @@ import CreateRoundedIcon from '@mui/icons-material/CreateRounded';
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded';
 import PersonAddAlt1RoundedIcon from '@mui/icons-material/PersonAddAlt1Rounded';
 import { useDispatch, useSelector } from 'react-redux';
-import { deletePerson, loadPersons } from '../redux/actions';
+import { requestOperation, loadPersons, saveData, setRequestError, setSucces } from '../redux/actions';
 import Modal from '@mui/material/Modal';
 import AddPerson from '../components/AddPerson';
+import EditPerson from '../components/EditPerson';
+import AlertDialogError from './DialogError'
+import DialogSucces from './DialogSucces'
+import DialogConfirm from './DialogConfirm'
 
 
 function TablePaginationActions(props) {
@@ -100,20 +104,43 @@ function TablePaginationActions(props) {
 
 const Persons = () => {
     let dispatch = useDispatch();
-    const {persons} = useSelector(state => state.data)
-
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-
+    const {persons, error, result, confirm} = useSelector(state => state.data)
+    const [modalInsertar, setModalInsertar]=useState(false);
+    const [modalEditar, setModalEditar]=useState(false);
+    const [state, setState] = React.useState({})
     useEffect(() => {
-        dispatch(loadPersons());
+     dispatch(setRequestError(null));
+   }, [])
+    useEffect(() => {
+      dispatch(setSucces(null));
+    }, [])
+    useEffect(() => {
+      dispatch(setRequestError(null));
+    }, [])
+    useEffect(() => {
+      dispatch(saveData(null));
+    }, [])
+    useEffect(() => {
+        dispatch(requestOperation(null));
+    }, [])
+    useEffect(() => {
+      dispatch(loadPersons());
     }, [])
 
-    const handleDelete =(documentType, documentNumber)=>{
-        if(window.confirm("Are you sure?")){
-            dispatch(deletePerson(documentType, documentNumber))
-        }
+    const abrirCerrarModalInsertar=()=>{
+      setModalInsertar(!modalInsertar);
+    }
+    const abrirCerrarModalEditar=(person)=>{
+      setModalEditar(!modalEditar);
+        setState ({ ...state, person});
+        dispatch(saveData(person))
+    }
+    
+
+
+    const handleDelete =(data)=>{
+          dispatch(requestOperation("Si"))
+          dispatch(saveData(data))
     }
 
     const [page, setPage] = React.useState(0);
@@ -137,7 +164,7 @@ const Persons = () => {
             <Typography variant="h4" gutterBottom>
               Persons
             </Typography>
-            <IconButton  onClick={handleOpen}><PersonAddAlt1RoundedIcon style={{ fontSize: "60px", color: "#43a047"  }}/></IconButton>
+            <IconButton  onClick={() => abrirCerrarModalInsertar()}><PersonAddAlt1RoundedIcon style={{ fontSize: "60px", color: "#43a047"  }}/></IconButton>
           </Stack>
           <Card>
           <TableContainer component={Paper}>
@@ -163,8 +190,8 @@ const Persons = () => {
                         <TableCell style={{ width: 130 }} align="left">{row.first_name + " " + row.second_name}</TableCell>
                         <TableCell style={{ width: 130 }} align="left">{row.lastName}</TableCell>
                         <TableCell style={{ width: 170 }} align="left">{row.hobbie}</TableCell>
-                        <TableCell style={{ width: 50 }} align="left"><IconButton onClick=""><CreateRoundedIcon style={{ fontSize: "30px", color: "#fbc02d"  }}/></IconButton></TableCell>
-                        <TableCell style={{ width: 50 }} align="left"><IconButton onClick={() => handleDelete(row.documentType, row.documentNumber)}><PersonRemoveRoundedIcon style={{ fontSize: "30px", color: "#d50000"  }}/></IconButton></TableCell>     
+                        <TableCell style={{ width: 50 }} align="left"><IconButton onClick={() => abrirCerrarModalEditar(row)}><CreateRoundedIcon style={{ fontSize: "30px", color: "#fbc02d"  }}/></IconButton></TableCell>
+                        <TableCell style={{ width: 50 }} align="left"><IconButton onClick={() => handleDelete(row)}><PersonRemoveRoundedIcon style={{ fontSize: "30px", color: "#d50000"  }}/></IconButton></TableCell>     
                     </TableRow>
                 ))}
                 {emptyRows > 0 && (
@@ -197,13 +224,20 @@ const Persons = () => {
             </TableContainer>
           </Card>
           <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
+        open={modalInsertar}
+        onClose={abrirCerrarModalInsertar}
       >
-            <AddPerson />
+            <AddPerson  setModalInsertar ={setModalInsertar}/>
           </Modal>
+          <Modal
+        open={modalEditar}
+        onClose={abrirCerrarModalEditar}
+      >
+            <EditPerson setModalEditar={setModalEditar} />
+          </Modal>
+          {error ? <AlertDialogError /> : null}
+          {result ? <DialogSucces /> : null}
+          {confirm ? <DialogConfirm /> : null}
         </Container>
       </>
     )}

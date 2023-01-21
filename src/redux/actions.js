@@ -7,61 +7,82 @@ const getPersons = (persons) => ({
     payload : persons
 });
 
-const personDeleted = (res) => ({
-    type: types.DELETE_PERSON,
-    payload : res
-})
+export const setRequestError = e => ({ 
+    type: types.REQUEST_ERROR, 
+    payload: e }
+);
 
-const personAdded = (res) => ({
-    type: types.ADD_PERSON,
-    payload : res
-})
+const headers = {
+    'Content-Type': 'application/json'
+};
+
+export const saveData = (data) => {
+    return {
+        type: types.STORAGE_PERSON,
+        payload : data
+    }
+
+}
+
+export const setSucces = (data) => {
+    return {
+        type: types.REQUEST_SUCCES,
+        payload : data
+    }
+}
+export const requestOperation = (data) => {
+    return {
+        type: types.REQUEST_CONFIRM,
+        payload : data
+    }
+}
 
 
 export const loadPersons = () => {
     return function (dispatch) {
-        axios.get('https://34.176.135.207:8000/person').then((res) => {
-            console.log("res", res.data);  
+        axios.get('https://info-manager-api-naj7d6dr4q-tl.a.run.app/person',{headers}).then((res) => {
+            if(res.status===200){
             dispatch(getPersons(res.data.data));
+            }
         }).catch(error => console.log(error));
     };
 };
 
 export const deletePerson = (documentType, documentNumber) => {
-    return function (dispatch) {
-        axios.delete(`https://34.176.135.207:8000/person?documentType=${documentType}&documentNumber=${documentNumber}`).then((res) => {
-            console.log("res", res.data); 
+    return async function (dispatch) {
+         await axios.delete(`https://info-manager-api-naj7d6dr4q-tl.a.run.app/person?documentType=${documentType}&documentNumber=${documentNumber}`).then((res) => {
             if(res.status===200){
-                alert("Person Deleted Sucsesful")
-            }else if(res.status===204){
-                alert("Error: Person not Exist")
-            }else{
-                alert("An error has ocurred")
-            } 
-            dispatch(personDeleted(res.data.data));
-            dispatch(loadPersons())
-        }).catch(error => console.log(error));
+                dispatch(setSucces(res.data));
+                dispatch(loadPersons())
+            }
+        }).catch(error => dispatch(setRequestError(error)));
         
     };
 };
 
 
 export const AddPersons = (person) => {
-    return function (dispatch) {
-        axios.post(`https://34.176.135.207:8000/person`, person).then((res) => {
-            console.log("res", res.data);  
-            console.log("res", res.status);
+    return async function (dispatch) {
+        await axios.post(`https://info-manager-api-naj7d6dr4q-tl.a.run.app/person`, person).then((res) => {
             if(res.status===201){
-                alert("Person created")
-            }else if(res.status===204){
-                alert("Error: Person Exist")
-            }else{
-                alert("An error has ocurred")
+                dispatch(setSucces(res.data));
+                dispatch(loadPersons())
             }
-            dispatch(personAdded(res.data.data));
-            dispatch(loadPersons())
-            //window.location.reload()
-        }).catch(error => console.log(error));
+            
+        }).catch(error => dispatch(setRequestError(error)));
         
     };
 };
+
+export const PutPerson = (person) => {
+    return async function (dispatch) {
+        await axios.put(`https://info-manager-api-naj7d6dr4q-tl.a.run.app/person`, person).then((res) => {
+            if(res.status===200){
+                dispatch(setSucces(res.data));
+                dispatch(loadPersons())
+            }
+        }).catch(error => dispatch(setRequestError(error)));
+        
+    };
+};
+

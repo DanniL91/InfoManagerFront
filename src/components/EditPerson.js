@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Box from '@mui/material/Box';
 import Input from '@mui/material/Input';
 import Select from '@mui/material/Select';
@@ -9,27 +9,8 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
-import {useDispatch} from "react-redux";
-import { AddPersons } from '../redux/actions';
-
-const docTypes = [
-  {
-    value: 'CC',
-    label: 'CC',
-  },
-  {
-    value: 'CE',
-    label: 'CE',
-  },
-  {
-    value: 'TI',
-    label: 'TI',
-  },
-  {
-    value: 'PA',
-    label: 'PA',
-  },
-];
+import { useDispatch, useSelector } from 'react-redux';
+import { PutPerson , requestOperation, setRequestError, setSucces} from '../redux/actions';
 
 const style = {
   position: 'absolute',
@@ -44,55 +25,56 @@ const style = {
 };
 
 
-export const AddPerson = () => {
-
-  const [state, setState] = React.useState({
-    documentType:"", 
-    documentNumber:"", 
-    first_name:"", 
-    second_name:"", 
-    lastName:"", 
-    hobbie:""
-  })
-
-  const {documentNumber, first_name, second_name, lastName, hobbie} = state;
-  const [num, setNum] = React.useState();
-  const handleChange = (e) => {
-    const regex = /^[0-9\b]+$/;
-    if(!regex.test(e.target.value)){
-      setNum("");
-    }
-    if (e.target.value === "" || regex.test(e.target.value)) {
-      setNum(e.target.value);
-      handleInputChange(e);
-
-    }
-  };
+export const EditPerson = ({setModalEditar}) => {
   let dispatch = useDispatch();
 
+  const {res} = useSelector(state => state.data)
+  useEffect(() => {
+    dispatch(setRequestError(null));
+  }, [])
+   useEffect(() => {
+     dispatch(setSucces(null));
+   }, [])
+   useEffect(() => {
+       dispatch(requestOperation(null));
+   }, [])
+
+  const [state2, setState2] = React.useState({
+    documentType:res["documentType"],
+    documentNumber:res["documentNumber"],
+    first_name: res["first_name"], 
+    second_name:res["second_name"], 
+    lastName:res["lastName"], 
+    hobbie:res["hobbie"]
+  })
+
+
+  
+
+  const {documentNumber, first_name, second_name, lastName, hobbie} = state2;
+  
   const handleInputChange = (e) => {
     let { name, value } = e.target;
-    console.log(name)
-    console.log(value)
-    setState ({ ...state, [name]: value});
+    setState2 ({ ...state2, [name]: value});
   }
   const [error, setError] = React.useState();
   const handleSend = (e) => {
-    console.log(state)
+
     e.preventDefault();
-    if (!first_name || !documentNumber || !lastName){
+    if ( !lastName){
       setError("Please verify the information")
-    }else{
-      console.log(state)
-      dispatch(AddPersons(state));
+    }else {
+      dispatch(PutPerson(state2));
       setError("");
     }
+    setModalEditar(false)
   }
 
   return (
     <Box sx={style}>
-    <InputLabel style={({ height: "10vh" }) }>Edit Person</InputLabel>
-    <InputLabel style={({ height: "10vh" }) }>{error}</InputLabel>
+    <InputLabel style={({ height: "10vh", textAlign:"center", fontWeight:"bold", color: "#000000", fontSize:"26px" }) }>Edit Person</InputLabel>
+
+    <InputLabel style={({ height: "6vh", color:"#d50000" }) }>{error}</InputLabel>
     <div>
       <FormControl fullWidth sx={{ m: 1, width: '10ch' }} variant="standard">
       <Select
@@ -101,28 +83,27 @@ export const AddPerson = () => {
           variant="standard"
           name="documentType"
           id="document-type"
-          onChange ={handleInputChange}
+          disabled={true}
         >
-          {docTypes.map((option) => (
-            <MenuItem  key={option.value} value={option.value}>
-              {option.label}
+            <MenuItem  value={res['documentType']}>
+              {res['documentType']}
             </MenuItem>
-          ))}
         </Select>
       </FormControl>
       <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-        <InputLabel htmlFor="standard-adornment-amount">Document Number</InputLabel>
-        <Input
-          type="text"
-          required
-          onChange={(e) => handleChange(e)}
+        <TextField 
+          multiline
+          rows={1}
+          label="Document Number"
           name="documentNumber"
-          value={num}
+          value={documentNumber}
           inputProps={{ maxLength: 12 }}
-          startadornment={<InputAdornment position="start"></InputAdornment>}
+          variant="standard"
+          disabled={true}          
         />
-      </FormControl>      <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-        <InputLabel htmlFor="standard-adornment-amount">First Name</InputLabel>
+      </FormControl>      
+      <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+        <InputLabel >First Name</InputLabel>
         <Input
           inputProps={{ maxLength: 50 }}
           name="first_name"
@@ -132,7 +113,7 @@ export const AddPerson = () => {
         />
       </FormControl>
       <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-        <InputLabel htmlFor="standard-adornment-amount">Second Name</InputLabel>
+        <InputLabel >Second Name</InputLabel>
         <Input
           inputProps={{ maxLength: 50 }}
           name="second_name"
@@ -142,7 +123,7 @@ export const AddPerson = () => {
         />
       </FormControl>
       <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-        <InputLabel htmlFor="standard-adornment-amount">Last Name</InputLabel>
+        <InputLabel >Last Name</InputLabel>
         <Input
           inputProps={{ maxLength: 100 }}
           name="lastName"
@@ -152,12 +133,12 @@ export const AddPerson = () => {
         />
       </FormControl>
       <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-        <InputLabel htmlFor="standard-adornment-amount">Hobbie</InputLabel>
         <TextField
           multiline
-          rows={4}
+          rows={3}
           inputProps={{ maxLength: 200 }}
           name="hobbie"
+          label="Hobbie"
           variant="standard"
           startadornment={<InputAdornment position="start"></InputAdornment>}
           onChange ={handleInputChange}
@@ -165,10 +146,11 @@ export const AddPerson = () => {
         />
       </FormControl>
       <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-      <IconButton  onClick={handleSend}><CheckCircleOutlineRoundedIcon style={{ fontSize: "60px", color: "#43a047"  }}/></IconButton>
+      <IconButton  onClick={e =>handleSend(e)}><CheckCircleOutlineRoundedIcon style={{ fontSize: "60px", color: "#43a047"  }}/></IconButton>
       </FormControl>
     </div>
+    
   </Box>
   )
 }
-export default AddPerson;
+export default EditPerson;
